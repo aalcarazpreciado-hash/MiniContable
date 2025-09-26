@@ -112,7 +112,7 @@ function limpiarFormulario() {
 }
 
 // Filtrar por mes
-function filtrarPorMes() {
-  const mes = document.getElementById("filtroMes").value;
+function filtrarPorMesUnico() {
+  const mes = document.getElementById("filtroMesUnico").value;
   mostrarMovimientos(mes);
 }

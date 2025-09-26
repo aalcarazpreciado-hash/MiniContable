@@ -1,15 +1,19 @@
+/* Fondo general */
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
-  background-color: #f4f6f8;
-}
-
-h1, h2 {
+  background-color: #fff7eb; /* ocre muy claro */
   color: #333;
 }
 
+/* Títulos */
+h1, h2 {
+  color: #cc7722; /* ocre oscuro */
+}
+
+/* Formulario */
 .form {
-  background: white;
+  background: #ffe9d6; /* ocre suave */
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
@@ -22,31 +26,69 @@ input, select, button {
   margin-top: 5px;
   width: 100%;
   box-sizing: border-box;
+  border: 1px solid #cc7722; /* borde ocre */
+  border-radius: 5px;
 }
 
 button {
-  background: none;
+  background: #cc7722;
+  color: white;
   border: none;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 16px;
+  transition: 0.2s;
 }
 
 button:hover {
-  transform: scale(1.2);
+  background: #b2661f;
+  transform: scale(1.05);
 }
 
+/* Contenedor de filtros */
+.filtros {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#filtroMesUnico {
+  width: auto;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #cc7722;
+  border-radius: 5px;
+}
+
+/* Tabla */
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  border: 1px solid #cc7722;
 }
 
 th, td {
   padding: 10px;
   text-align: left;
+  border: 1px solid #cc7722;
 }
 
+/* Cabecera de tabla */
 th {
-  background: #007bff;
+  background: #cc7722;
   color: white;
+}
+
+/* Filas alternadas */
+tbody tr:nth-child(even) td {
+  background: #f8f1e7; /* ocre clarito */
+}
+
+tbody tr:nth-child(odd) td {
+  background: #fff3e0; /* otro tono ocre suave */
+}
+
+/* Totales y balance */
+p {
+  font-weight: bold;
 }
