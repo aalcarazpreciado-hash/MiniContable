@@ -1,8 +1,25 @@
-console.log("Script cargado con mejoras 🚀");
+console.log("Script cargado con backend 🚀");
 
 let movimientos = [];
 
-function agregarMovimiento() {
+// URL de tu backend
+const API_URL = "http://localhost:3000/movimientos";
+
+// Cargar movimientos desde el servidor al iniciar
+async function cargarMovimientos() {
+  try {
+    const res = await fetch(API_URL);
+    movimientos = await res.json();
+    mostrarMovimientos();
+  } catch (error) {
+    console.error("Error al cargar movimientos:", error);
+  }
+}
+
+cargarMovimientos();
+
+// Agregar movimiento
+async function agregarMovimiento() {
   const descripcion = document.getElementById("descripcion").value;
   const monto = parseFloat(document.getElementById("monto").value);
   const fecha = document.getElementById("fecha").value;
@@ -13,23 +30,33 @@ function agregarMovimiento() {
     return;
   }
 
-  // Crear objeto movimiento
   const movimiento = { descripcion, monto, fecha, tipo };
-  movimientos.push(movimiento);
 
-  filtrarPorMes(); // aplicar filtro si hay mes seleccionado
-  limpiarFormulario();
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(movimiento)
+    });
+    const data = await res.json();
+    movimiento.id = data.id; // asignar id generado por SQLite
+    movimientos.push(movimiento);
+    mostrarMovimientos();
+    limpiarFormulario();
+  } catch (error) {
+    console.error("Error al agregar movimiento:", error);
+  }
 }
 
+// Mostrar movimientos
 function mostrarMovimientos(filtroMes = "") {
   const tabla = document.getElementById("tabla").getElementsByTagName("tbody")[0];
-  tabla.innerHTML = ""; // limpiar tabla
+  tabla.innerHTML = "";
 
   let ingresos = 0;
   let gastos = 0;
 
-  movimientos.forEach((mov, index) => {
-    // Filtrar por mes si está activo
+  movimientos.forEach((mov) => {
     if (filtroMes && !mov.fecha.startsWith(filtroMes)) return;
 
     const fila = tabla.insertRow();
@@ -38,41 +65,45 @@ function mostrarMovimientos(filtroMes = "") {
     fila.insertCell(2).innerText = mov.fecha;
     fila.insertCell(3).innerText = mov.tipo;
 
-    // Acciones (editar y eliminar)
     const acciones = fila.insertCell(4);
     acciones.innerHTML = `
-      <button onclick="editarMovimiento(${index})">✏️</button>
-      <button onclick="eliminarMovimiento(${index})">🗑️</button>
+      <button onclick="editarMovimiento(${mov.id})">✏️</button>
+      <button onclick="eliminarMovimiento(${mov.id})">🗑️</button>
     `;
 
-    // Sumar totales
     if (mov.tipo === "ingreso") ingresos += mov.monto;
     else gastos += mov.monto;
   });
 
-  // Actualizar totales
   document.getElementById("totalIngresos").innerText = ingresos.toFixed(2);
   document.getElementById("totalGastos").innerText = gastos.toFixed(2);
   document.getElementById("balance").innerText = (ingresos - gastos).toFixed(2);
 }
 
-function eliminarMovimiento(index) {
-  movimientos.splice(index, 1);
-  filtrarPorMes(); // actualizar con filtro si está activo
+// Eliminar movimiento
+async function eliminarMovimiento(id) {
+  try {
+    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    movimientos = movimientos.filter(mov => mov.id !== id);
+    mostrarMovimientos();
+  } catch (error) {
+    console.error("Error al eliminar movimiento:", error);
+  }
 }
 
-function editarMovimiento(index) {
-  const mov = movimientos[index];
+// Editar movimiento
+async function editarMovimiento(id) {
+  const mov = movimientos.find(m => m.id === id);
   document.getElementById("descripcion").value = mov.descripcion;
   document.getElementById("monto").value = mov.monto;
   document.getElementById("fecha").value = mov.fecha;
   document.getElementById("tipo").value = mov.tipo;
 
-  // Eliminar el movimiento viejo para reemplazarlo con el editado
-  movimientos.splice(index, 1);
-  filtrarPorMes(); // refrescar la vista según el filtro actual
+  // Al guardar, eliminamos el viejo primero
+  await eliminarMovimiento(id);
 }
 
+// Limpiar formulario
 function limpiarFormulario() {
   document.getElementById("descripcion").value = "";
   document.getElementById("monto").value = "";
@@ -80,6 +111,7 @@ function limpiarFormulario() {
   document.getElementById("tipo").value = "ingreso";
 }
 
+// Filtrar por mes
 function filtrarPorMes() {
   const mes = document.getElementById("filtroMes").value;
   mostrarMovimientos(mes);
