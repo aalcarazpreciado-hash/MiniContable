@@ -1,22 +1,29 @@
-/* Fondo general */
+/* =========================
+   GENERAL
+========================= */
+#formularioClientes, #formularioProveedores {
+  display: none;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 20px;
-  background-color: #fff7eb; /* ocre muy claro */
-  color: #333;
+  background: #343434; /* gris oscuro */
+  color: #f4f6f8;
 }
 
-/* Títulos */
 h1, h2 {
-  color: #cc7722; /* ocre oscuro */
+  color: #bea074;
 }
 
-/* Formulario */
+/* =========================
+   FORMULARIOS
+========================= */
 .form {
-  background: #ffe9d6; /* ocre suave */
+  background: linear-gradient(145deg, #646464, #514c41);
   padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
   margin-bottom: 20px;
   max-width: 400px;
 }
@@ -26,69 +33,219 @@ input, select, button {
   margin-top: 5px;
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #cc7722; /* borde ocre */
   border-radius: 5px;
+  border: none;
 }
 
 button {
-  background: #cc7722;
-  color: white;
-  border: none;
+  background: linear-gradient(135deg, #bea074, #846c4c);
+  color: #343434;
   cursor: pointer;
   font-size: 16px;
-  transition: 0.2s;
+  border-radius: 6px;
+  transition: all 0.2s ease;
 }
 
 button:hover {
-  background: #b2661f;
+  background: linear-gradient(135deg, #846c4c, #7c6c64);
+  color: #f4f6f8;
   transform: scale(1.05);
 }
 
-/* Contenedor de filtros */
-.filtros {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-#filtroMesUnico {
-  width: auto;
-  padding: 5px;
-  font-size: 14px;
-  border: 1px solid #cc7722;
-  border-radius: 5px;
-}
-
-/* Tabla */
+/* =========================
+   TABLAS
+========================= */
 table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #cc7722;
+  background: #5c5b5b;
+  color: #f4f6f8;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 th, td {
   padding: 10px;
   text-align: left;
-  border: 1px solid #cc7722;
 }
 
-/* Cabecera de tabla */
 th {
-  background: #cc7722;
-  color: white;
+  background: linear-gradient(135deg, #343434, #514c41);
+  color: #bea074;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.1);
+}
+
+td {
+  border-bottom: 1px solid #48423c;
 }
 
 /* Filas alternadas */
 tbody tr:nth-child(even) td {
-  background: #f8f1e7; /* ocre clarito */
+  background: #7c6c64;
 }
 
 tbody tr:nth-child(odd) td {
-  background: #fff3e0; /* otro tono ocre suave */
+  background: #846c4c;
 }
 
 /* Totales y balance */
 p {
   font-weight: bold;
+}
+
+/* =========================
+   TABS
+========================= */
+.tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tablink {
+  background-color: #514c41;
+  color: #bea074;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  border-radius: 5px 5px 0 0;
+  transition: all 0.2s ease;
+}
+
+.tablink:hover {
+   background: linear-gradient(135deg, #846c4c, #7c6c64);
+}
+
+.tabcontent {
+  display: none;
+  padding: 20px;
+  border: 1px solid #846c4c;
+  border-top: none;
+  background: #646464;
+  border-radius: 0 0 12px 12px;
+}
+
+/* =========================
+   FILTROS
+========================= */
+.filtroMes {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* =========================
+   RESUMEN - DASHBOARD
+========================= */
+#Resumen {
+  display: block;
+  padding: 20px;
+  background: #646464;
+  border-radius: 12px;
+  border: 1px solid #846c4c;
+}
+
+/* Contenedor de tarjetas */
+.resumen-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+/* Tarjeta individual */
+.card {
+  background: linear-gradient(145deg, #514c41, #5c5b5b);
+  color: #f4f6f8;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  min-width: 220px;
+  flex: 1 1 250px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+.card h3 {
+  margin-top: 0;
+  color: #bea074;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.card p {
+  font-size: 1.1em;
+  margin: 5px 0;
+}
+
+/* =========================
+   GRÁFICOS
+========================= */
+.graficos-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.grafico {
+  background: linear-gradient(135deg, #514c41, #5c5b5b);
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 4 / 3;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.grafico:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+
+.grafico canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.resumen-seccion {
+  margin-bottom: 30px;
+}
+
+.resumen-tarjeta {
+  background-color: #5c5b5b; /* gris medio de la paleta */
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  color: #f4f6f8;
+}
+
+/* Ajuste de tablas dentro de tarjeta */
+.resumen-tarjeta table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resumen-tarjeta th, .resumen-tarjeta td {
+  padding: 8px;
+  text-align: left;
+}
+
+.resumen-tarjeta th {
+  background-color: #343434;
+  color: #bea074;
+}
+
+.resumen-tarjeta td {
+  border-bottom: 1px solid #48423c;
 }

@@ -4,67 +4,369 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mini Contable</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #343434;
+      color: #f4f6f8;
+    }
+
+    h1, h2 {
+      color: #bea074;
+    }
+
+    .form {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      max-width: 400px;
+    }
+
+    input, select, button {
+      padding: 8px;
+      margin-top: 5px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #bea074;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #343434;
+      border-radius: 5px;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      background:#846c4c;
+      color: #f4f6f8;
+      transform: scale(1.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background:#646464;
+      color: #f4f6f8;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background: #343434;
+      color: #bea074;
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.1);
+    }
+
+    td {
+      border-bottom: 1px solid #48423c;
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tablink {
+      background-color: #514c41;
+      color: #bea074;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 5px;
+      border-radius: 5px 5px 0 0;
+    }
+
+    .tablink:hover {
+      background-color: #846c4c;
+    }
+
+    .tabcontent {
+      display: none;
+      padding: 20px;
+      border: 1px solid #846c4c;
+      border-top: none;
+      background-color: #646464;
+      border-radius: 0 0 8px 8px;
+    }
+
+    .filtroMes {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    tbody tr:nth-child(even) td {
+      background: #7c6c64;
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: #846c4c;
+    }
+
+    p {
+      font-weight: bold;
+    }
+
+    .graficos-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .grafico {
+      width: 100%;
+      max-width: 250px;
+      aspect-ratio: 4 / 3;
+      background: #5c5b5b;
+      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .grafico:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .grafico canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Formularios ocultos por defecto */
+    #formularioClientes, #formularioProveedores {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <h1>CCI CONTABLE</h1>
 
-  <div class="form">
-    <label>Descripción:</label>
-    <input type="text" id="descripcion" placeholder="Ej: Venta de producto"><br><br>
-
-    <label>Monto:</label>
-    <input type="number" id="monto" placeholder="Ej: 2000"><br><br>
-
-    <label>Fecha:</label>
-    <input type="date" id="fecha"><br><br>
-
-    <label>Tipo:</label>
-    <select id="tipo">
-      <option value="ingreso">Ingreso</option>
-      <option value="gasto">Gasto</option>
-    </select><br><br>
-
-    <button onclick="agregarMovimiento()">Agregar</button>
+  <!-- Pestañas -->
+  <div class="tabs">
+    <button class="tablink" onclick="abrirPestaña(event, 'Resumen')" id="defaultOpen">Resumen</button>
+    <button class="tablink" onclick="abrirPestaña(event, 'Agregar')">Agregar</button>
+    <button class="tablink" onclick="abrirPestaña(event, 'Listado')">Listado</button>
+    <button class="tablink" onclick="abrirPestaña(event, 'Clientes')">Clientes</button>
+    <button class="tablink" onclick="abrirPestaña(event, 'Proveedores')">Proveedores</button>
   </div>
 
-  <h2>Filtros</h2>
- <label for="filtroMesUnico">Filtrar por mes:</label>
-<select id="filtroMesUnico" onchange="filtrarPorMesUnico()">
-  <option value="">--Selecciona un mes--</option>
-  <option value="2025-01">Enero 2025</option>
-  <option value="2025-02">Febrero 2025</option>
-  <option value="2025-03">Marzo 2025</option>
-  <option value="2025-04">Abril 2025</option>
-  <option value="2025-05">Mayo 2025</option>
-  <option value="2025-06">Junio 2025</option>
-  <option value="2025-07">Julio 2025</option>
-  <option value="2025-08">Agosto 2025</option>
-  <option value="2025-09">Septiembre 2025</option>
-  <option value="2025-10">Octubre 2025</option>
-  <option value="2025-11">Noviembre 2025</option>
-  <option value="2025-12">Diciembre 2025</option>
-</select>
+  <!-- Pestaña Resumen -->
+  <div id="Resumen" class="tabcontent">
+    <div class="resumen-seccion">
+      <h2>Balance General</h2>
+      <div id="balanceGeneral" class="resumen-tarjeta"></div>
+    </div>
+    <div class="resumen-seccion">
+      <h2>Resumen por Concepto</h2>
+      <div id="resumenConceptos" class="resumen-tarjeta"></div>
+    </div>
+    <div class="resumen-seccion">
+      <h2>Gráficos</h2>
+      <div class="graficos-container">
+        <div class="grafico"><canvas id="graficoBalance"></canvas></div>
+        <div class="grafico"><canvas id="graficoConceptos"></canvas></div>
+      </div>
+    </div>
+  </div>
 
-  <h2>Registros</h2>
-  <table border="1" id="tabla">
-    <thead>
-      <tr>
-        <th>Descripción</th>
-        <th>Monto</th>
-        <th>Fecha</th>
-        <th>Tipo</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <!-- Pestaña Agregar -->
+  <div id="Agregar" class="tabcontent">
+    <h2>Agregar / Editar Movimiento</h2>
+    <div class="form">
+      <label>Concepto:</label>
+      <input type="text" id="concepto" placeholder="Ej: Venta de producto">
+      
+      <label>Fecha:</label>
+      <input type="date" id="fecha">
 
-  <h2>Totales</h2>
-  <p><strong>Total Ingresos:</strong> $<span id="totalIngresos">0</span></p>
-  <p><strong>Total Gastos:</strong> $<span id="totalGastos">0</span></p>
-  <p><strong>Balance:</strong> $<span id="balance">0</span></p>
+      <label>Forma de pago:</label>
+      <select id="formaPago">
+        <option value="Efectivo">Efectivo</option>
+        <option value="Tarjeta">Tarjeta</option>
+        <option value="Transferencia">Transferencia</option>
+      </select>
 
+      <label>Proveedor:</label>
+      <input type="text" id="proveedor" placeholder="Ej: Proveedor XYZ">
+
+      <label>Ingreso:</label>
+      <input type="number" id="ingreso" placeholder="Ej: 2000">
+
+      <label>Gasto:</label>
+      <input type="number" id="gasto" placeholder="Ej: 500">
+
+      <label>Descripción:</label>
+      <input type="text" id="descripcion" placeholder="Ej: Pago de factura">
+
+      <button type="button" onclick="guardarMovimiento()">Guardar Movimiento</button>
+      <button type="button" onclick="limpiarFormulario()">Limpiar</button>
+    </div>
+  </div>
+
+  <!-- Pestaña Listado -->
+  <div id="Listado" class="tabcontent">
+    <h2>Listado Completo</h2>
+    <div class="filtroMes">
+      <label>Filtrar por mes:</label>
+      <select id="filtroMesUnico" onchange="filtrarPorMesUnico()">
+        <option value="">-- Selecciona mes --</option>
+        <option value="2025-01">Enero</option>
+        <option value="2025-02">Febrero</option>
+        <option value="2025-03">Marzo</option>
+        <option value="2025-04">Abril</option>
+        <option value="2025-05">Mayo</option>
+        <option value="2025-06">Junio</option>
+        <option value="2025-07">Julio</option>
+        <option value="2025-08">Agosto</option>
+        <option value="2025-09">Septiembre</option>
+        <option value="2025-10">Octubre</option>
+        <option value="2025-11">Noviembre</option>
+        <option value="2025-12">Diciembre</option>
+      </select>
+    </div>
+
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Concepto</th>
+          <th>Fecha</th>
+          <th>Forma de pago</th>
+          <th>Proveedor</th>
+          <th>Ingreso</th>
+          <th>Gasto</th>
+          <th>Saldo</th>
+          <th>Descripción</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Pestaña Clientes -->
+  <div id="Clientes" class="tabcontent">
+    <h2>Clientes</h2>
+    <button type="button" onclick="mostrarFormulario('Clientes')">Agregar Cliente</button>
+
+    <div class="form" id="formularioClientes">
+      <input type="hidden" id="cliente_id">
+
+      <label>Nombre:</label>
+      <input type="text" id="cliente_nombre" placeholder="Nombre completo">
+
+      <label>RFC:</label>
+      <input type="text" id="cliente_rfc" placeholder="RFC">
+
+      <label>Domicilio:</label>
+      <input type="text" id="cliente_domicilio" placeholder="Dirección completa">
+
+      <label>Régimen Fiscal:</label>
+      <input type="text" id="cliente_regimen" placeholder="Ej: Persona Física">
+
+      <label>Teléfono:</label>
+      <input type="text" id="cliente_telefono" placeholder="Ej: 3121234567">
+
+      <label>Correo:</label>
+      <input type="email" id="cliente_email" placeholder="correo@dominio.com">
+
+      <button type="button" onclick="guardarCliente()">Guardar Cliente</button>
+      <button type="button" onclick="limpiarFormularioCliente()">Limpiar</button>
+    </div>
+
+    <h3>Listado de Clientes</h3>
+    <table border="1" id="tablaClientes">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Nombre</th>
+          <th>RFC</th>
+          <th>Domicilio</th>
+          <th>Régimen fiscal</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Pestaña Proveedores -->
+  <div id="Proveedores" class="tabcontent">
+    <h2>Proveedores</h2>
+    <button type="button" onclick="mostrarFormulario('Proveedores')">Agregar Proveedor</button>
+
+    <div class="form" id="formularioProveedores">
+      <label>Nombre:</label>
+      <input type="text" id="proveedor_nombre">
+
+      <label>RFC:</label>
+      <input type="text" id="proveedor_rfc">
+
+      <label>Domicilio:</label>
+      <input type="text" id="proveedor_domicilio">
+
+      <label>Régimen Fiscal:</label>
+      <input type="text" id="proveedor_regimen">
+
+      <label>Teléfono:</label>
+      <input type="text" id="proveedor_telefono">
+
+      <label>Correo:</label>
+      <input type="email" id="proveedor_email">
+
+      <button type="button" onclick="guardarProveedor()">Guardar Proveedor</button>
+      <button type="button" onclick="limpiarFormularioProveedor()">Limpiar</button>
+    </div>
+
+    <h3>Listado de Proveedores</h3>
+    <table id="tablaProveedores">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Nombre</th>
+          <th>RFC</th>
+          <th>Domicilio</th>
+          <th>Régimen</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
+  <script>
+    function mostrarFormulario(tipo) {
+      if(tipo === 'Clientes') {
+        document.getElementById('formularioClientes').style.display = 'block';
+      } else if(tipo === 'Proveedores') {
+        document.getElementById('formularioProveedores').style.display = 'block';
+      }
+    }
+  </script>
 </body>
 </html>
