@@ -434,8 +434,15 @@ async function actualizarGraficos() {
       },
       options: {
         plugins: {
-          title: { display: true, text: 'Balance General' },
-          legend: { position: 'bottom' }
+          title: { 
+          display: true,
+          text: 'Balance General', 
+          color: '#f4f6f8' },
+         
+          legend: { 
+            position: 'bottom',
+            labels: { color: '#f4f6f8' } 
+        }
         }
       }
     });
@@ -473,14 +480,19 @@ async function actualizarGraficos() {
       },
       options: {
         plugins: {
-          title: { display: true, text: 'Resumen por Concepto' }
+          title: { display: true, text: 'Resumen por Concepto', color: '#f4f6f8' },
+          legend: { labels: { color: '#f4f6f8' } }
         },
         scales: {
           y: {
             beginAtZero: true,
-            ticks: { callback: value => '$' + value.toLocaleString() }
-          }
+            ticks: { callback: value => '$' + value.toLocaleString(),
+              color: '#f4f6f8'
+             }
+          },
+          x: {ticks: { color: '#f4f6f8' }
         }
+      }
       }
     });
 
