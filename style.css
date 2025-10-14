@@ -249,3 +249,15 @@ p {
 .resumen-tarjeta td {
   border-bottom: 1px solid #48423c;
 }
+
+#buscarCuenta {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+#tablaCuentas th, #tablaCuentas td {
+  padding: 8px;
+  text-align: left;
+}

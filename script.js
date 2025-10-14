@@ -500,3 +500,93 @@ async function actualizarGraficos() {
     console.error("Error generando gráficos:", error);
   }
 }
+
+// Cargar cuentas existentes
+function cargarCatalogo() {
+  // 1️⃣ Listado de cuentas creadas por el usuario (tabla)
+  fetch('http://localhost:4000/cuentas')
+    .then(res => res.json())
+    .then(data => {
+      const tbody = document.querySelector('#tablaCuentas tbody');
+      tbody.innerHTML = '';
+
+      data.forEach(cuenta => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${cuenta.codigo}</td>
+          <td>${cuenta.nombre}</td>
+          <td>${cuenta.tipo}</td>
+          <td>${cuenta.nivel}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => console.error('Error al cargar cuentas creadas:', err));
+
+  // 2️⃣ Cargar select de Cuenta Padre con plantillas (catálogo SAT)
+  fetch('http://localhost:4000/cuentas/plantillas')
+    .then(res => res.json())
+    .then(data => {
+      const cuentaPadreSelect = document.getElementById('cuentaPadre');
+      cuentaPadreSelect.innerHTML = `<option value="">-- Cuenta Padre (opcional) --</option>`;
+
+      data.forEach(cuenta => {
+        const option = document.createElement('option');
+        option.value = cuenta.id;
+        option.textContent = `${cuenta.codigo} - ${cuenta.nombre}`;
+        cuentaPadreSelect.appendChild(option);
+      });
+    })
+    .catch(err => console.error('Error al cargar cuentas plantillas:', err));
+}
+
+// Búsqueda rápida
+function filtrarCuentas() {
+  const filtro = document.getElementById('buscarCuenta').value.toLowerCase();
+  const rows = document.querySelectorAll('#tablaCuentas tbody tr');
+  rows.forEach(row => {
+    const nombre = row.cells[1].textContent.toLowerCase();
+    const codigo = row.cells[0].textContent.toLowerCase();
+    row.style.display = (nombre.includes(filtro) || codigo.includes(filtro)) ? '' : 'none';
+  });
+}
+
+// Crear nueva cuenta
+function crearCuenta(event) {
+  event.preventDefault();
+
+  const codigo = document.getElementById('nuevoCodigo').value.trim();
+  const nombre = document.getElementById('nuevoNombre').value.trim();
+  const tipo = document.getElementById('nuevoTipo').value;
+  const cuenta_padre_id = document.getElementById('cuentaPadre').value || null;
+  const etiquetas = document.getElementById('etiquetas').value
+                    .split(',')
+                    .map(e => e.trim())
+                    .filter(e => e);
+
+  fetch('http://localhost:4000/cuentas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ codigo, nombre, tipo, nivel: 1, cuenta_padre_id, etiquetas })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log('Cuenta creada:', data);
+    document.getElementById('formNuevaCuenta').reset();
+    cargarCatalogo(); // recargar tabla y select
+  })
+  .catch(err => console.error('Error al crear cuenta:', err));
+}
+
+// Abrir pestaña Configuración
+function abrirPestaña(evt, nombrePestaña) {
+  const tabcontent = document.getElementsByClassName('tabcontent');
+  for (let i = 0; i < tabcontent.length; i++) tabcontent[i].style.display = 'none';
+  const tablinks = document.getElementsByClassName('tablink');
+  for (let i = 0; i < tablinks.length; i++) tablinks[i].className = tablinks[i].className.replace(' active', '');
+
+  document.getElementById(nombrePestaña).style.display = 'block';
+  evt.currentTarget.className += ' active';
+
+  if (nombrePestaña === 'Configuracion') cargarCatalogo();
+}

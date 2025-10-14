@@ -166,6 +166,7 @@
     <button class="tablink" onclick="abrirPestaña(event, 'Listado')">Listado</button>
     <button class="tablink" onclick="abrirPestaña(event, 'Clientes')">Clientes</button>
     <button class="tablink" onclick="abrirPestaña(event, 'Proveedores')">Proveedores</button>
+    <button class="tablink" onclick="abrirPestaña(event, 'Configuracion')">Configuración</button>
   </div>
 
   <!-- Pestaña Resumen -->
@@ -355,6 +356,53 @@
       <tbody></tbody>
     </table>
   </div>
+  
+<!---Catalogo de Cuentas -->  
+<div id="Configuracion" class="tabcontent">
+  <h2>Catálogo de Cuentas</h2>
+
+  <!-- Búsqueda rápida -->
+  <div class="form">
+    <input type="text" id="buscarCuenta" placeholder="Buscar cuenta..." onkeyup="filtrarCuentas()">
+  </div>
+
+  <!-- Tabla de cuentas -->
+  <table id="tablaCuentas">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Nivel</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <hr>
+
+  <!-- Formulario para crear nueva cuenta -->
+  <h3>Agregar nueva cuenta</h3>
+  <form id="formNuevaCuenta" onsubmit="crearCuenta(event)">
+    <input type="text" id="nuevoCodigo" placeholder="Código" required>
+    <input type="text" id="nuevoNombre" placeholder="Nombre de la cuenta" required>
+    
+    <select id="nuevoTipo" required>
+      <option value="Activo">Activo</option>
+      <option value="Pasivo">Pasivo</option>
+      <option value="Capital">Capital</option>
+      <option value="Ingreso">Ingreso</option>
+      <option value="Gasto">Gasto</option>
+    </select>
+
+    <select id="cuentaPadre">
+      <option value="">-- Cuenta Padre (opcional) --</option>
+    </select>
+
+    <input type="text" id="etiquetas" placeholder="Etiquetas (separadas por coma)">
+    <button type="submit">Agregar cuenta</button>
+  </form>
+</div>
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
