@@ -1,5 +1,9 @@
 const API_URL = "http://localhost:4000";
 
+// Variables globales para los gráficos
+let graficoBalance = null;
+let graficoConceptos = null;
+
 // ==========================
 // FUNCIONES GENERALES
 // ==========================
@@ -13,10 +17,12 @@ function abrirPestaña(evt, nombrePestaña) {
   document.getElementById(nombrePestaña).style.display = "block";
   evt.currentTarget.classList.add("active");
 
+  // Cargar datos según la pestaña
   if (nombrePestaña === "Resumen") {
     cargarBalanceGeneral();
-    cargarResumenPorConcepto()
-    setTimeout(actualizarGraficos, 100); // <--- importante
+    cargarResumenPorConcepto();
+  } else if (nombrePestaña === 'Configuracion') {
+    cargarCatalogo();
   }
 }
 
@@ -28,63 +34,71 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Balance General
-function cargarBalanceGeneral() {
-  fetch("http://localhost:4000/movimientos")
-    .then(res => res.json())
-    .then(movimientos => {
-      let totalIngresos = 0;
-      let totalGastos = 0;
+async function cargarBalanceGeneral() {
+  try {
+    const res = await fetch(`${API_URL}/movimientos`);
+    const movimientos = await res.json();
+    
+    let totalIngresos = 0;
+    let totalGastos = 0;
 
-      movimientos.forEach(m => {
-        totalIngresos += m.ingreso;
-        totalGastos += m.gasto;
-      });
+    movimientos.forEach(m => {
+      totalIngresos += parseFloat(m.ingreso) || 0;
+      totalGastos += parseFloat(m.gasto) || 0;
+    });
 
-      const saldo = totalIngresos - totalGastos;
+    const saldo = totalIngresos - totalGastos;
 
-      document.getElementById("balanceGeneral").innerHTML = `
-        <p>Total Ingresos: $${totalIngresos.toFixed(2)}</p>
-        <p>Total Gastos: $${totalGastos.toFixed(2)}</p>
-        <p><strong>Saldo: $${saldo.toFixed(2)}</strong></p>
-      `;
-    })
-    .catch(err => console.error("Error cargando balance:", err));
+    document.getElementById("balanceGeneral").innerHTML = `
+      <p>Total Ingresos: $${totalIngresos.toFixed(2)}</p>
+      <p>Total Gastos: $${totalGastos.toFixed(2)}</p>
+      <p><strong>Saldo: $${saldo.toFixed(2)}</strong></p>
+    `;
+    
+    // Actualizar gráficos después de cargar los datos
+    actualizarGraficos();
+  } catch (err) {
+    console.error("Error cargando balance:", err);
+  }
 }
-//resumen por concepto
-function cargarResumenPorConcepto() {
-  fetch("http://localhost:4000/movimientos")
-    .then(res => res.json())
-    .then(movimientos => {
-      const resumen = {};
 
-      movimientos.forEach(m => {
-        if (!resumen[m.concepto]) {
-          resumen[m.concepto] = { ingreso: 0, gasto: 0 };
-        }
-        resumen[m.concepto].ingreso += m.ingreso;
-        resumen[m.concepto].gasto += m.gasto;
-        });
+// Resumen por concepto
+async function cargarResumenPorConcepto() {
+  try {
+    const res = await fetch(`${API_URL}/movimientos`);
+    const movimientos = await res.json();
+    
+    const resumen = {};
 
-      let html = "<table border='1'><tr><th>Concepto</th><th>Ingresos</th><th>Gastos</th></tr>";
-      for (const concepto in resumen) {
-        html += `<tr>
-          <td>${concepto}</td>
-          <td>$${resumen[concepto].ingreso.toFixed(2)}</td>
-          <td>$${resumen[concepto].gasto.toFixed(2)}</td>
-        </tr>`;
+    movimientos.forEach(m => {
+      const concepto = m.concepto || 'Sin concepto';
+      if (!resumen[concepto]) {
+        resumen[concepto] = { ingreso: 0, gasto: 0 };
       }
+      resumen[concepto].ingreso += parseFloat(m.ingreso) || 0;
+      resumen[concepto].gasto += parseFloat(m.gasto) || 0;
+    });
 
-      html += "</table>";
-      document.getElementById("resumenConceptos").innerHTML = html;
-      actualizarGraficos();
-    })
-    .catch(err => console.error("Error cargando resumen:", err));
+    let html = "<table><tr><th>Concepto</th><th>Ingresos</th><th>Gastos</th></tr>";
+    for (const concepto in resumen) {
+      html += `<tr>
+        <td>${concepto}</td>
+        <td>$${resumen[concepto].ingreso.toFixed(2)}</td>
+        <td>$${resumen[concepto].gasto.toFixed(2)}</td>
+      </tr>`;
+    }
+    html += "</table>";
+    
+    document.getElementById("resumenConceptos").innerHTML = html;
+  } catch (err) {
+    console.error("Error cargando resumen:", err);
+  }
 }
 
 // ==========================
 // CLIENTES
 // ==========================
-const API_CLIENTES = "http://localhost:4000/clientes";
+const API_CLIENTES = `${API_URL}/clientes`;
 let clientes = [];
 
 async function cargarClientes() {
@@ -137,14 +151,12 @@ async function guardarCliente() {
   try {
     let res;
     if (id) {
-      // Editar cliente existente
       res = await fetch(`${API_CLIENTES}/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cliente)
       });
     } else {
-      // Crear nuevo cliente
       res = await fetch(API_CLIENTES, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -178,8 +190,8 @@ function editarCliente(id) {
   document.getElementById("cliente_telefono").value = c.telefono || "";
   document.getElementById("cliente_email").value = c.email || "";
 
-  // Cambiar a pestaña Clientes
   document.querySelector(".tablink[onclick*='Clientes']")?.click();
+  document.getElementById('formularioClientes').style.display = 'block';
 }
 
 async function eliminarCliente(id) {
@@ -198,6 +210,7 @@ function limpiarFormularioCliente() {
   document.getElementById("cliente_id").value = "";
   ["cliente_nombre","cliente_rfc","cliente_domicilio","cliente_regimen","cliente_telefono","cliente_email"]
     .forEach(id => document.getElementById(id).value = "");
+  document.getElementById('formularioClientes').style.display = 'none';
 }
 
 // ==========================
@@ -239,6 +252,7 @@ function limpiarFormularioProveedor() {
   document.getElementById("proveedor_telefono").value = "";
   document.getElementById("proveedor_email").value = "";
   document.getElementById("proveedor_nombre").dataset.id = "";
+  document.getElementById('formularioProveedores').style.display = 'none';
 }
 
 function editarProveedor(prov) {
@@ -250,6 +264,7 @@ function editarProveedor(prov) {
   document.getElementById("proveedor_telefono").value = prov.telefono || "";
   document.getElementById("proveedor_email").value = prov.email || "";
   document.getElementById("proveedor_nombre").dataset.id = prov.id;
+  document.getElementById('formularioProveedores').style.display = 'block';
 }
 
 async function guardarProveedor() {
@@ -321,7 +336,7 @@ async function cargarMovimientos() {
         <td>${mov.proveedor_id || ""}</td>
         <td>${mov.ingreso || 0}</td>
         <td>${mov.gasto || 0}</td>
-        <td>${saldo}</td>
+        <td>${saldo.toFixed(2)}</td>
         <td>${mov.descripcion || ""}</td>
         <td>
           <button onclick='editarMovimiento(${JSON.stringify(mov)})'>Editar</button>
@@ -391,8 +406,10 @@ async function guardarMovimiento() {
     }
     limpiarFormulario();
     cargarMovimientos();
+    alert("Movimiento guardado exitosamente");
   } catch (err) {
     console.error(err);
+    alert("Error al guardar el movimiento");
   }
 }
 
@@ -405,44 +422,74 @@ async function eliminarMovimiento(id) {
     console.error(err);
   }
 }
-// === FUNCIÓN: ACTUALIZAR GRÁFICOS (versión conectada al backend) ===
+
+// ==========================
+// FILTRO POR MES
+// ==========================
+function filtrarPorMesUnico() {
+  const mesSeleccionado = document.getElementById("filtroMesUnico").value;
+  const filas = document.querySelectorAll("#tabla tbody tr");
+  
+  filas.forEach(fila => {
+    const fecha = fila.cells[2].textContent;
+    if (!mesSeleccionado || fecha.startsWith(mesSeleccionado)) {
+      fila.style.display = "";
+    } else {
+      fila.style.display = "none";
+    }
+  });
+}
+
+// ==========================
+// ACTUALIZAR GRÁFICOS
+// ==========================
 async function actualizarGraficos() {
   try {
     const res = await fetch(`${API_URL}/movimientos`);
     const movimientos = await res.json();
 
-    // 🔹 Calcular totales generales
+    // Calcular totales generales
     const totalIngresos = movimientos.reduce((acc, m) => acc + (parseFloat(m.ingreso) || 0), 0);
     const totalGastos = movimientos.reduce((acc, m) => acc + (parseFloat(m.gasto) || 0), 0);
 
     // === GRÁFICO DE BALANCE GENERAL ===
-    const ctxBalance = document.getElementById('graficoBalance').getContext('2d');
+    const ctxBalance = document.getElementById('graficoBalance');
+    if (!ctxBalance) {
+      console.error("No se encontró el canvas graficoBalance");
+      return;
+    }
 
-    if (window.graficoBalance && typeof window.graficoBalance.destroy === 'function') {
-  window.graficoBalance.destroy();
-}
+    // Destruir gráfico anterior si existe
+    if (graficoBalance) {
+      graficoBalance.destroy();
+    }
 
-    window.graficoBalance = new Chart(ctxBalance, {
+    graficoBalance = new Chart(ctxBalance, {
       type: 'doughnut',
       data: {
         labels: ['Ingresos', 'Gastos'],
         datasets: [{
           data: [totalIngresos, totalGastos],
-          backgroundColor: ['#bea074', '#343434'],
+          backgroundColor: ['#bea074', '#846c4c'],
+          borderColor: ['#f4f6f8', '#f4f6f8'],
+          borderWidth: 2,
           hoverOffset: 8
         }]
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: true,
         plugins: {
           title: { 
-          display: true,
-          text: 'Balance General', 
-          color: '#f4f6f8' },
-         
+            display: true,
+            text: 'Balance General', 
+            color: '#f4f6f8',
+            font: { size: 16 }
+          },
           legend: { 
             position: 'bottom',
             labels: { color: '#f4f6f8' } 
-        }
+          }
         }
       }
     });
@@ -461,50 +508,72 @@ async function actualizarGraficos() {
     const conceptos = Object.keys(resumen);
     const valores = Object.values(resumen);
 
-    const ctxConceptos = document.getElementById('graficoConceptos').getContext('2d');
-   if (window.graficoConceptos && typeof window.graficoConceptos.destroy === 'function') {
-  window.graficoConceptos.destroy();
-}
+    const ctxConceptos = document.getElementById('graficoConceptos');
+    if (!ctxConceptos) {
+      console.error("No se encontró el canvas graficoConceptos");
+      return;
+    }
 
-    window.graficoConceptos = new Chart(ctxConceptos, {
+    // Destruir gráfico anterior si existe
+    if (graficoConceptos) {
+      graficoConceptos.destroy();
+    }
+
+    graficoConceptos = new Chart(ctxConceptos, {
       type: 'bar',
       data: {
         labels: conceptos,
         datasets: [{
           label: 'Resultado por Concepto',
           data: valores,
-          backgroundColor: [
-  '#bea074', '#846c4c', '#7c6c64', '#514c41', '#48423c', '#5c5b5b', '#646464', '#343434'
-],
+          backgroundColor: '#bea074',
+          borderColor: '#846c4c',
+          borderWidth: 1
         }]
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: true,
         plugins: {
-          title: { display: true, text: 'Resumen por Concepto', color: '#f4f6f8' },
-          legend: { labels: { color: '#f4f6f8' } }
+          title: { 
+            display: true, 
+            text: 'Resumen por Concepto', 
+            color: '#f4f6f8',
+            font: { size: 16 }
+          },
+          legend: { 
+            labels: { color: '#f4f6f8' } 
+          }
         },
         scales: {
           y: {
             beginAtZero: true,
-            ticks: { callback: value => '$' + value.toLocaleString(),
+            ticks: { 
+              callback: value => '$' + value.toLocaleString(),
               color: '#f4f6f8'
-             }
+            },
+            grid: { color: '#514c41' }
           },
-          x: {ticks: { color: '#f4f6f8' }
+          x: {
+            ticks: { color: '#f4f6f8' },
+            grid: { color: '#514c41' }
+          }
         }
-      }
       }
     });
 
+    console.log("Gráficos actualizados correctamente");
   } catch (error) {
     console.error("Error generando gráficos:", error);
   }
 }
 
-// Cargar cuentas existentes
+// ==========================
+// CATÁLOGO DE CUENTAS
+// ==========================
 function cargarCatalogo() {
-  // 1️⃣ Listado de cuentas creadas por el usuario (tabla)
-  fetch('http://localhost:4000/cuentas')
+  // Listado de cuentas creadas por el usuario
+  fetch(`${API_URL}/cuentas`)
     .then(res => res.json())
     .then(data => {
       const tbody = document.querySelector('#tablaCuentas tbody');
@@ -523,8 +592,8 @@ function cargarCatalogo() {
     })
     .catch(err => console.error('Error al cargar cuentas creadas:', err));
 
-  // 2️⃣ Cargar select de Cuenta Padre con plantillas (catálogo SAT)
-  fetch('http://localhost:4000/cuentas/plantillas')
+  // Cargar select de Cuenta Padre con plantillas
+  fetch(`${API_URL}/cuentas/plantillas`)
     .then(res => res.json())
     .then(data => {
       const cuentaPadreSelect = document.getElementById('cuentaPadre');
@@ -564,7 +633,7 @@ function crearCuenta(event) {
                     .map(e => e.trim())
                     .filter(e => e);
 
-  fetch('http://localhost:4000/cuentas', {
+  fetch(`${API_URL}/cuentas`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ codigo, nombre, tipo, nivel: 1, cuenta_padre_id, etiquetas })
@@ -573,20 +642,7 @@ function crearCuenta(event) {
   .then(data => {
     console.log('Cuenta creada:', data);
     document.getElementById('formNuevaCuenta').reset();
-    cargarCatalogo(); // recargar tabla y select
+    cargarCatalogo();
   })
   .catch(err => console.error('Error al crear cuenta:', err));
-}
-
-// Abrir pestaña Configuración
-function abrirPestaña(evt, nombrePestaña) {
-  const tabcontent = document.getElementsByClassName('tabcontent');
-  for (let i = 0; i < tabcontent.length; i++) tabcontent[i].style.display = 'none';
-  const tablinks = document.getElementsByClassName('tablink');
-  for (let i = 0; i < tablinks.length; i++) tablinks[i].className = tablinks[i].className.replace(' active', '');
-
-  document.getElementById(nombrePestaña).style.display = 'block';
-  evt.currentTarget.className += ' active';
-
-  if (nombrePestaña === 'Configuracion') cargarCatalogo();
 }
